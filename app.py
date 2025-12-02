@@ -9,7 +9,7 @@ from Helpers import MongoDB, ElasticSearch, Funciones, WebScraping
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'clave_super_secreta_12345')
+app.secret_key = os.getenv('SECRET_KEY', 'clave_super_secreta_123456')
 
 # Configuración MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
