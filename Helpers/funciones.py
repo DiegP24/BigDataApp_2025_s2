@@ -105,10 +105,7 @@ class Funciones:
                     elif os.path.isdir(item_path):
                         import shutil
                         shutil.rmtree(item_path)  # Eliminar directorio y su contenido
-<<<<<<< HEAD
                         print(f"Eliminado directorio: {item_path}")
-=======
->>>>>>> origin/main
                 except Exception as e:
                     print(f"Error al eliminar {item_path}: {e}")
                     return False
