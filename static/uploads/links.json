@@ -1,0 +1,36 @@
+{
+    "links": [
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/decreto-unico-minsalud-780-de-2016.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/actos-administrativos.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/Notificaciones-por-aviso.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/Proyectos-de-actos-administrativos.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/agenda-regulatoria.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/informe-global-de-participacion-ciudadana.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/analisis-de-impacto-normativo.aspx",
+            "type": "aspx"
+        },
+        {
+            "url": "https://www.minsalud.gov.co/Normativa/Paginas/normativa.aspx",
+            "type": "aspx"
+        }
+    ]
+}
