@@ -23,8 +23,8 @@ ELASTIC_API_KEY         = os.getenv('ELASTIC_API_KEY')
 ELASTIC_INDEX_DEFAULT   = os.getenv('ELASTIC_INDEX_DEFAULT', 'index_cuentos')
 
 # Versión de la aplicación
-VERSION_APP = "1.2.0"
-CREATOR_APP = "LuisFCG"
+VERSION_APP = "1.1.0"
+CREATOR_APP = "DiegoAPP"
 
 # Inicializar conexiones
 mongo = MongoDB(MONGO_URI, MONGO_DB)
@@ -406,6 +406,56 @@ def cargar_doc_elastic():
 #     except Exception as e:
 #         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/procesar-webscraping-elastic', methods=['POST'])
+def procesar_webscraping_elastic():
+    try:
+        data = request.get_json()
+        url = data.get('url')
+        
+        # 1. Configuración
+        # Importante: Asegúrate de que esta carpeta exista y coincida con donde guarda el scraper
+        CARPETA_DESTINO = os.path.join('static', 'uploads')
+        ARCHIVO_JSON_TEMP = os.path.join(CARPETA_DESTINO, 'temp_links.json')
+        
+        # 2. Ejecutar Scraper
+        scraper = WebScraping(dominio_base="https://www.superfinanciera.gov.co")
+        
+        # Paso A: Extraer Links
+        scraper.extraer_todos_los_links(
+            url_inicial=url, 
+            json_file_path=ARCHIVO_JSON_TEMP,
+            listado_extensiones=['pdf'],
+            max_iteraciones=1
+        )
+        
+        # Paso B: Descargar
+        resultado_descarga = scraper.descargar_pdfs(ARCHIVO_JSON_TEMP, CARPETA_DESTINO)
+        scraper.close()
+        
+        # 3. LEER QUÉ SE DESCARGÓ PARA ENVIARLO AL HTML
+        # Esto es lo que faltaba: listar los archivos físicos reales
+        archivos_encontrados = []
+        if os.path.exists(CARPETA_DESTINO):
+            for nombre in os.listdir(CARPETA_DESTINO):
+                ruta_completa = os.path.join(CARPETA_DESTINO, nombre)
+                if os.path.isfile(ruta_completa) and nombre.lower().endswith('.pdf'):
+                    archivos_encontrados.append({
+                        'nombre': nombre,
+                        'ruta': ruta_completa, # Ruta relativa para el servidor
+                        'extension': 'pdf',
+                        'tamaño': os.path.getsize(ruta_completa)
+                    })
+
+        return jsonify({
+            'success': True,
+            'archivos': archivos_encontrados, # <--- Esta es la clave para el HTML
+            'mensaje': f"Proceso finalizado. Se descargaron {len(archivos_encontrados)} archivos."
+        })
+
+    except Exception as e:
+        print(f"Error en ruta scraping: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/procesar-zip-elastic', methods=['POST'])
 def procesar_zip_elastic():
     """API para procesar archivo ZIP con archivos JSON"""
@@ -571,74 +621,74 @@ def cargar_documentos_elastic():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/procesar-webscraping-elastic', methods=['POST'])
-def procesar_webscraping_elastic():
-    """API para procesar Web Scraping"""
-    try:
-        if not session.get('logged_in'):
-            return jsonify({'success': False, 'error': 'No autorizado'}), 401
+# @app.route('/procesar-webscraping-elastic', methods=['POST'])
+# def procesar_webscraping_elastic():
+#     """API para procesar Web Scraping"""
+#     try:
+#         if not session.get('logged_in'):
+#             return jsonify({'success': False, 'error': 'No autorizado'}), 401
         
-        permisos = session.get('permisos', {})
-        if not permisos.get('admin_data_elastic'):
-            return jsonify({'success': False, 'error': 'No tiene permisos para cargar datos'}), 403
+#         permisos = session.get('permisos', {})
+#         if not permisos.get('admin_data_elastic'):
+#             return jsonify({'success': False, 'error': 'No tiene permisos para cargar datos'}), 403
         
-        data = request.get_json()
-        url = data.get('url')
-        extensiones_navegar = data.get('extensiones_navegar', 'aspx')
-        tipos_archivos = data.get('tipos_archivos', 'pdf')
-        index = data.get('index')
+#         data = request.get_json()
+#         url = data.get('url')
+#         extensiones_navegar = data.get('extensiones_navegar', 'aspx')
+#         tipos_archivos = data.get('tipos_archivos', 'pdf')
+#         index = data.get('index')
         
-        if not url or not index:
-            return jsonify({'success': False, 'error': 'URL e índice son requeridos'}), 400
+#         if not url or not index:
+#             return jsonify({'success': False, 'error': 'URL e índice son requeridos'}), 400
         
-        # Procesar listas de extensiones
-        lista_ext_navegar = [ext.strip() for ext in extensiones_navegar.split(',')]
-        lista_tipos_archivos = [ext.strip() for ext in tipos_archivos.split(',')]
+#         # Procesar listas de extensiones
+#         lista_ext_navegar = [ext.strip() for ext in extensiones_navegar.split(',')]
+#         lista_tipos_archivos = [ext.strip() for ext in tipos_archivos.split(',')]
         
-        # Combinar ambas listas para extraer todos los enlaces
-        todas_extensiones = lista_ext_navegar + lista_tipos_archivos
+#         # Combinar ambas listas para extraer todos los enlaces
+#         todas_extensiones = lista_ext_navegar + lista_tipos_archivos
         
-        # Inicializar WebScraping
-        scraper = WebScraping(dominio_base=url.rsplit('/', 1)[0] + '/')
+#         # Inicializar WebScraping
+#         scraper = WebScraping(dominio_base=url.rsplit('/', 1)[0] + '/')
         
-        # Limpiar carpeta de uploads
-        carpeta_upload = 'static/uploads'
-        Funciones.crear_carpeta(carpeta_upload)
-        Funciones.borrar_contenido_carpeta(carpeta_upload)
+#         # Limpiar carpeta de uploads
+#         carpeta_upload = 'static/uploads'
+#         Funciones.crear_carpeta(carpeta_upload)
+#         Funciones.borrar_contenido_carpeta(carpeta_upload)
         
-        # Extraer todos los enlaces
-        json_path = os.path.join(carpeta_upload, 'links.json')
-        resultado = scraper.extraer_todos_los_links(
-            url_inicial=url,
-            json_file_path=json_path,
-            listado_extensiones=todas_extensiones,
-            max_iteraciones=50
-        )
+#         # Extraer todos los enlaces
+#         json_path = os.path.join(carpeta_upload, 'links.json')
+#         resultado = scraper.extraer_todos_los_links(
+#             url_inicial=url,
+#             json_file_path=json_path,
+#             listado_extensiones=todas_extensiones,
+#             max_iteraciones=50
+#         )
         
-        if not resultado['success']:
-            return jsonify({'success': False, 'error': 'Error al extraer enlaces'}), 500
+#         if not resultado['success']:
+#             return jsonify({'success': False, 'error': 'Error al extraer enlaces'}), 500
         
-        # Descargar archivos PDF (o los tipos especificados)
-        resultado_descarga = scraper.descargar_pdfs(json_path, carpeta_upload)
+#         # Descargar archivos PDF (o los tipos especificados)
+#         resultado_descarga = scraper.descargar_pdfs(json_path, carpeta_upload)
         
-        scraper.close()
+#         scraper.close()
         
-        # Listar archivos descargados
-        archivos = Funciones.listar_archivos_carpeta(carpeta_upload, lista_tipos_archivos)
+#         # Listar archivos descargados
+#         archivos = Funciones.listar_archivos_carpeta(carpeta_upload, lista_tipos_archivos)
         
-        return jsonify({
-            'success': True,
-            'archivos': archivos,
-            'mensaje': f'Se descargaron {len(archivos)} archivos',
-            'stats': {
-                'total_enlaces': resultado['total_links'],
-                'descargados': resultado_descarga.get('descargados', 0),
-                'errores': resultado_descarga.get('errores', 0)
-            }
-        })
+#         return jsonify({
+#             'success': True,
+#             'archivos': archivos,
+#             'mensaje': f'Se descargaron {len(archivos)} archivos',
+#             'stats': {
+#                 'total_enlaces': resultado['total_links'],
+#                 'descargados': resultado_descarga.get('descargados', 0),
+#                 'errores': resultado_descarga.get('errores', 0)
+#             }
+#         })
         
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+#     except Exception as e:
+#         return jsonify({'success': False, 'error': str(e)}), 500
 #--------------rutas de elasitcsearch - fin-------------
 @app.route('/admin')
 def admin():
@@ -648,7 +698,6 @@ def admin():
         return redirect(url_for('login'))
     
     return render_template('admin.html', usuario=session.get('usuario'), permisos=session.get('permisos'))
-
 
 
 # ==================== MAIN ====================

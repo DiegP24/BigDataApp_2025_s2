@@ -1,24 +1,120 @@
+/* --- ESTILO SUPERFINANCIERA (Landing/Login/About) --- */
+
+:root {
+    --sfc-blue: #003366;       /* Azul Institucional */
+    --sfc-hover: #004080;      /* Azul un poco más claro para hover */
+    --bg-gray: #f4f6f9;        /* Fondo gris suave */
+    --text-dark: #333333;
+    --text-white: #ffffff;
+}
 
 body {
-    background: linear-gradient(to right, #255821, #40E0D0);
+    background-color: var(--bg-gray);
+    background-image: none; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0;
 }
+
+/* --- HEADER --- */
 .header {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--sfc-blue);
     padding: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    color: var(--text-dark);
 }
+
+.header h1, .header h2, .header h3 {
+    color: var(--text-dark) !important; /* Títulos en Negro */
+    font-weight: 600;
+}
+
+/* --- MENÚ DE NAVEGACIÓN (Corrección de visibilidad) --- */
+.header .nav-link {
+    background-color: var(--sfc-hover);
+    color: #ffffff !important; /* FORZAR COLOR BLANCO */
+    font-weight: 500;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.header .nav-link:hover, .header .nav-link.active {
+    color: #ffffff !important;
+    opacity: 1;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    background-color: rgba(0,0,0,0.1); /* Fondo sutil al pasar mouse */
+    border-radius: 5px;
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
 .container {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 2rem;
-    border-radius: 10px;
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 8px;
     margin-top: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex: 1;
 }
+
+/* --- BOTONES --- */
+.btn-primary {
+    background-color: var(--sfc-blue);
+    border-color: var(--sfc-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--sfc-hover);
+    border-color: var(--sfc-hover);
+}
+
+/* --- FOOTER --- */
 footer {
-    background-color: rgba(0, 95, 73, 0.9);
-    padding: 1rem 0;
-    margin-top: 2rem;
-    color: #666;
+    background-color: var(--sfc-blue);
+    padding: 1.5rem 0;
+    margin-top: auto;
+    color: #ffffff;
+    font-size: 0.9rem;
+    text-align: center;
 }
+
+footer p {
+    margin-bottom: 0.2rem;
+    opacity: 0.9;
+    color: #ffffff !important;
+}
+
+.profile-img {
+    /* 1. Tamaño: Define el ancho y alto iguales para que sea un cuadrado perfecto */
+    width: 200px;
+    height: 200px;
+
+    /* 2. Recorte Circular: Esto la convierte en un círculo */
+    border-radius: 50%;
+
+    /* 3. ¡IMPORTANTE! Evita que la foto se deforme o aplaste */
+    object-fit: contain;
+    object-position: center;
+
+    /* 4. Estilo SFC: Borde azul institucional y sombra suave */
+    border: 1px solid var(--sfc-blue); /* Usa la variable de color que definimos antes */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    /* 5. Separación */
+    margin-bottom: 15px;
     
+    /* Animación opcional al pasar el mouse */
+    transition: transform 0.3s ease;
+}
+
+/* Efecto opcional: La foto crece un poco al pasar el mouse */
+.profile-img:hover {
+    transform: scale(1.05);
+    border-color: var(--sfc-hover);
+}

@@ -1,23 +1,117 @@
 
+/* --- ESTILO SUPERFINANCIERA (Gestor/Interno) --- */
+
+:root {
+    --sfc-blue: #003366;
+    --sfc-hover: #004080;
+    --bg-gray: #f4f6f9;
+    --text-dark: #333333; /* Definimos un color de texto oscuro */
+    --text-light: #ffffff;
+}
+
 body {
-    background: linear-gradient(to right, #f9cbac, #f7f7f1);
+    background-color: var(--bg-gray);
+    background: var(--bg-gray); 
     min-height: 100vh;
     margin: 0;
     padding: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-dark); /* Aseguramos que todo el cuerpo use texto oscuro por defecto */
 }
+
 .header {
-    background-color: rgba(138, 193, 242, 0.9);
+    background-color: var(--sfc-blue);
     padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: var(--text-light);
 }
+
+.header h2, .header h3 {
+    color: var(--text-light); /* Títulos en blanco en el header */
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* Navegación interna */
+.header .nav-link {
+    color: var(--text-light) !important;
+    opacity: 0.8;
+}
+.header .nav-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* --- CONTENEDORES Y TARJETAS (CARTAS) --- */
 .container {
-    background-color: rgba(130, 180, 201, 0.9);
-    padding: 2rem;
-    border-radius: 10px;
+    background-color: transparent; 
+    padding: 0;
     margin-top: 2rem;
+    flex: 1;
 }
+
+/* Estilizamos las tarjetas (Cards) de Bootstrap */
+.card {
+    border: none;
+    border-top: 4px solid var(--sfc-blue); /* Borde superior azul elegante */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background-color: white; /* Fondo blanco para las tarjetas */
+    margin-bottom: 1.5rem;
+    color: var(--text-dark); /* Texto oscuro dentro de la tarjeta */
+}
+
+.card-header {
+    background-color: white;
+    font-weight: bold;
+    color: var(--sfc-blue);
+    border-bottom: 1px solid #eee;
+}
+
+.card-title {
+    color: var(--sfc-blue);
+    font-weight: 600;
+}
+
+/* --- TABLA DE RESULTADOS --- */
+.table {
+    color: var(--text-dark); /* Aseguramos que el texto de la tabla sea oscuro */
+}
+
+.table-dark {
+    background-color: var(--sfc-blue) !important;
+    color: var(--text-light); /* Cabecera de la tabla en azul con texto blanco */
+}
+
+/* --- BOTONES --- */
+.btn-primary {
+    background-color: var(--sfc-blue);
+    border-color: var(--sfc-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--sfc-hover);
+    border-color: var(--sfc-hover);
+}
+/* Estilo para el botón de cargar/PLN */
+.btn-success {
+    background-color: #28a745; 
+    border-color: #28a745;
+}
+
+
+/* --- FOOTER --- */
 footer {
-    background-color: rgba(80, 129, 242, 0.9);
+    background-color: var(--sfc-blue);
     padding: 1rem 0;
-    margin-top: 2rem;
-    color: #666;
+    margin-top: 3rem;
+    color: var(--text-light);
+    text-align: center;
 }
+
+footer p {
+    color: rgba(255,255,255, 0.8);
+}
+
+
