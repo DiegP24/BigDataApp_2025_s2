@@ -20,7 +20,7 @@ MONGO_COLECCION = os.getenv('MONGO_COLECCION', 'usuario_roles')
 # Configuración ElasticSearch Cloud
 ELASTIC_CLOUD_URL       = os.getenv('ELASTIC_CLOUD_URL')
 ELASTIC_API_KEY         = os.getenv('ELASTIC_API_KEY')
-ELASTIC_INDEX_DEFAULT   = os.getenv('ELASTIC_INDEX_DEFAULT', 'index_cuentos')
+ELASTIC_INDEX_DEFAULT   = os.getenv('ELASTIC_INDEX_DEFAULT', 'sfc_circulares_externas')
 
 # Versión de la aplicación
 VERSION_APP = "1.1.0"
@@ -47,62 +47,120 @@ def buscador():
     """Página de búsqueda pública"""
     return render_template('buscador.html', version=VERSION_APP, creador=CREATOR_APP)
 
+# @app.route('/buscar-elastic', methods=['POST'])
+# def buscar_elastic(): 
+#     """API para realizar búsqueda en ElasticSearch"""
+#     try:
+#         data = request.get_json()
+#         texto_buscar = data.get('texto', '').strip()
+#         #campo = data.get('campo', '_all') # _opciones (traidos de un select del formulario): titulo, contenido, autor, fecha_creacion
+#         campo = 'texto'
+#         campo = data.get('campo', '_all')
+        
+#         if not texto_buscar:
+#             return jsonify({
+#                 'success': False,
+#                 'error': 'Texto de búsqueda es requerido'
+#             }), 400
+        
+#         # Definir aggregations/filtros
+#         # Definir aggregations
+#         query_base= {"query": {
+#                             "match": {
+#                                 campo: texto_buscar
+#                             }
+#                         } 
+#                     }
+#         aggs= {
+#             "cuentos_por_mes": {
+#                 "date_histogram": {
+#                     "field": "fecha_creacion",
+#                     "calendar_interval": "month"
+#                 }
+#             },
+#             "cuentos_por_autor": {
+#                 "terms": {
+#                     "field": "autor",
+#                     "size": 10
+#                 }
+#             }
+#         }
+        
+#         # Ejecutar búsqueda sobre elastic
+#         # Ejecutar búsqueda con match_phrase
+#         resultado = elastic.buscar(
+#             index=ELASTIC_INDEX_DEFAULT,
+#             query=query_base,
+#             aggs=aggs,            
+#             size=100
+#         )
+#         #print(resultado) 
+        
+#         return jsonify(resultado)
+        
+#     except Exception as e:
+#         return jsonify({
+#             'success': False,
+#             'error': str(e)
+#         }), 500
+
 @app.route('/buscar-elastic', methods=['POST'])
 def buscar_elastic(): 
     """API para realizar búsqueda en ElasticSearch"""
     try:
         data = request.get_json()
         texto_buscar = data.get('texto', '').strip()
-        #campo = data.get('campo', '_all') # _opciones (traidos de un select del formulario): titulo, contenido, autor, fecha_creacion
-        campo = 'texto'
-        campo = data.get('campo', '_all')
         
-        if not texto_buscar:
-            return jsonify({
-                'success': False,
-                'error': 'Texto de búsqueda es requerido'
-            }), 400
+        # --- LÓGICA DE CONSULTA INTELIGENTE ---
         
-        # Definir aggregations/filtros
-        # Definir aggregations
-        query_base= {"query": {
-                            "match": {
-                                campo: texto_buscar
-                            }
-                        } 
-                    }
-        aggs= {
-            "cuentos_por_mes": {
-                "date_histogram": {
-                    "field": "fecha_creacion",
-                    "calendar_interval": "month"
+        if not texto_buscar or texto_buscar == '*':
+            # CASO 1: Consulta Default (Traer todo)
+            # Usamos match_all cuando no hay texto
+            print("🔍 Ejecutando búsqueda total (match_all)")
+            query_base = {
+                "query": {
+                    "match_all": {}
                 }
-            },
-            "cuentos_por_autor": {
-                "terms": {
-                    "field": "autor",
-                    "size": 10
+            }
+        else:
+            # CASO 2: Búsqueda específica
+            # Usamos multi_match si el usuario escribió algo
+            print(f"🔍 Buscando: {texto_buscar}")
+            query_base = {
+                "query": {
+                    "multi_match": {
+                        "query": texto_buscar,
+                        "fields": ["titulo^3", "contenido_texto", "nombre_archivo"],
+                        "fuzziness": "AUTO"
+                    }
+                }
+            }
+        
+        # Agregaciones (Estadísticas)
+        aggs = {
+            "por_anio": {
+                "date_histogram": {
+                    "field": "fecha_procesamiento",
+                    "calendar_interval": "year"
                 }
             }
         }
         
-        # Ejecutar búsqueda sobre elastic
-        # Ejecutar búsqueda con match_phrase
+        # Ejecutar búsqueda
+        # Asegúrate de que ELASTIC_INDEX_DEFAULT apunte a 'sfc_circulares_externas'
         resultado = elastic.buscar(
-            index=ELASTIC_INDEX_DEFAULT,
+            index=ELASTIC_INDEX_DEFAULT, 
             query=query_base,
             aggs=aggs,            
-            size=100
+            size=50 # Traer los primeros 50 resultados
         )
-        #print(resultado) 
         
         return jsonify(resultado)
         
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        print(f"❌ Error en búsqueda: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 #--------------rutas del buscador en elastic-fin-------------
 #--------------rutas de mongodb (usuarios)-inicio-------------
 @app.route('/login', methods=['GET', 'POST'])
